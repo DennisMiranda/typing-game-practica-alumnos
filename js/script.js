@@ -21,7 +21,7 @@ function initGame() {
   $game.style.display = "flex";
   $input.value = "";
 
-  words = INITIAL_WORDS.toSorted(() => Math.random() - 0.5).slice(0, 0);
+  words = INITIAL_WORDS.toSorted(() => Math.random() - 0.5);
   currentTime = INITIAL_TIME;
 
   $time.textContent = currentTime;
@@ -59,7 +59,7 @@ function initEvents() {
   });
 
   $input.addEventListener("keydown", onkeydown);
-  $input.addEventListener("key", onkeyup);
+  $input.addEventListener("keyup", onkeyup);
   $button.addEventListener("click", initGame);
 }
 
@@ -68,6 +68,7 @@ function onkeydown(event) {
   const $currentLetter = $currentWord.querySelector("letter.active");
 
   const { key } = event;
+  //Manejar espacios
   if (key === " ") {
     event.preventDefault();
 
@@ -89,6 +90,7 @@ function onkeydown(event) {
     return;
   }
 
+  // Borrar letras
   if (key === "Backspace") {
     const $prevWord = $currentWord.previousElementSibling;
     const $prevLetter = $currentLetter.previousElementSibling;
@@ -119,7 +121,8 @@ function onkeydown(event) {
   }
 }
 
-function onkeyup() {
+function onkeyup(event) {
+  const char = event.key;
   const $currentWord = $paragraph.querySelector("word.active");
   const $currentLetter = $currentWord.querySelector("letter.active");
 

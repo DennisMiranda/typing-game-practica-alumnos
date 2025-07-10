@@ -82,7 +82,7 @@ function onkeydown(event) {
     $nextLetter.classList.add("active");
 
     const hasMissedLetters =
-      $currentWord.querySelectorAll("letter:not(.correcto)").length > 0;
+      $currentWord.querySelectorAll("letter:not(.correct)").length > 0;
 
     const classToAdd = hasMissedLetters ? "market" : "correct";
     $currentWord.classList.add(classToAdd);
@@ -146,8 +146,9 @@ function onkeyup(event) {
     $letter.classList.add(letterClass);
   });
 
+  //
   $currentLetter.classList.remove("active", "is-last");
-  const inputLength = $input.value;
+  const inputLength = $input.value.length;
   const $nextActiveLetter = $allLetters[inputLength];
 
   if ($nextActiveLetter) {

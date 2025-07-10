@@ -122,7 +122,6 @@ function onkeydown(event) {
 }
 
 function onkeyup(event) {
-  const char = event.key;
   const $currentWord = $paragraph.querySelector("word.active");
   const $currentLetter = $currentWord.querySelector("letter.active");
 
@@ -135,13 +134,16 @@ function onkeyup(event) {
     $letter.classList.remove("correct", "incorrect")
   );
 
-  $input.value.split("").forEach((index) => {
+  $input.value.split("").forEach((e, index) => {
     const $letter = $allLetters[index];
     const letterToCheck = currentWord[index];
 
+    const char = $input.value[index];
+
+    //Revisar si es correcto solo la letra actual
     const isCorrect = char === letterToCheck;
     const letterClass = isCorrect ? "correct" : "incorrect";
-    $letter.addEventListener.add(letterClass);
+    $letter.classList.add(letterClass);
   });
 
   $currentLetter.classList.remove("active", "is-last");

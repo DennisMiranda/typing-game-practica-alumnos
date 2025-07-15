@@ -8,6 +8,7 @@ const $game = document.querySelector("#game");
 const $results = document.querySelector("#results");
 const $exactitud = $results.querySelector("#results-exactitud");
 const $button = document.querySelector("#reload-button");
+const $ppm = document.querySelector("#results-wpm");
 
 const INITIAL_TIME = 30;
 
@@ -19,13 +20,16 @@ initEvents();
 
 function initGame() {
   $game.style.display = "flex";
+  $results.style.display = "none";
   $input.value = "";
+  $input.disabled = false;
 
   words = INITIAL_WORDS.toSorted(() => Math.random() - 0.5);
   currentTime = INITIAL_TIME;
 
   $time.textContent = currentTime;
 
+  // Insertar palabras en el párrafo
   $paragraph.innerHTML = words
     .map((word, index) => {
       const letters = word.split("");
@@ -38,10 +42,13 @@ function initGame() {
     })
     .join("");
 
+  //Activar primera palbara y letra
   const $firstWord = $paragraph.querySelector("word");
+
   $firstWord.classList.add("active");
   $firstWord.querySelector("letter").classList.add("active");
 
+  //Iniciar tiempo
   const intervalId = setInterval(() => {
     currentTime--;
     $time.textContent = currentTime;
@@ -50,7 +57,7 @@ function initGame() {
       clearInterval(intervalId);
       gameOver();
     }
-  }, 10000);
+  }, 1000);
 }
 
 function initEvents() {
@@ -65,15 +72,23 @@ function initEvents() {
 
 function onkeydown(event) {
   const $currentWord = $paragraph.querySelector("word.active");
+  if (!$currentWord) return;
+
+  const inputText = $input.value;
+
   const $currentLetter = $currentWord.querySelector("letter.active");
 
   const { key } = event;
-  //Manejar espacios
+  //Manejar espacios - moverse a la siguiente palabra
   if (key === " ") {
     event.preventDefault();
 
     const $nextWord = $currentWord.nextElementSibling;
     const $nextLetter = $nextWord.querySelector("letter");
+    if (!$nextWord) {
+      gameOver();
+      return;
+    }
 
     $currentWord.classList.remove("active", "marked");
     $currentLetter.classList.remove("active");
@@ -84,14 +99,13 @@ function onkeydown(event) {
     const hasMissedLetters =
       $currentWord.querySelectorAll("letter:not(.correct)").length > 0;
 
-    const classToAdd = hasMissedLetters ? "market" : "correct";
+    const classToAdd = hasMissedLetters ? "marked" : "correct";
     $currentWord.classList.add(classToAdd);
-
-    return;
+    $input.value = "";
   }
 
   // Borrar letras
-  if (key === "Backspace") {
+  if (key === "Backspace" && inputText.length === 0) {
     const $prevWord = $currentWord.previousElementSibling;
     const $prevLetter = $currentLetter.previousElementSibling;
 
@@ -101,18 +115,23 @@ function onkeydown(event) {
     }
 
     const $wordMarked = $paragraph.querySelector("word.marked");
+
     if ($wordMarked && !$prevLetter) {
       event.preventDefault();
-      $prevWord.classList.remove("merked");
+      $prevWord.classList.remove("marked");
 
       const $letterToGo = $prevWord.querySelector("letter:last-child");
 
       $currentLetter.classList.remove("active");
+      $currentWord.classList.remove("active");
       $letterToGo.classList.add("active");
+      $prevWord.classList.add("active");
 
-      $input.value = [
-        ...$prevWord.querySelector("letter.correct, letter.incorrect"),
-      ]
+      const prevWordValues = $prevWord.querySelectorAll(
+        "letter.correct, letter.incorrect"
+      );
+
+      $input.value = [...prevWordValues]
         .map(($el) => {
           return $el.classList.contains("correct") ? $el.innerText : "*";
         })
@@ -159,8 +178,9 @@ function onkeyup(event) {
 }
 
 function gameOver() {
-  $game.style.display = "none";
+  // $game.style.display = "none";
   $results.style.display = "flex";
+  $input.disabled = true;
 
   const correctWords = $paragraph.querySelectorAll("word.correct").length;
   const correctLetter = $paragraph.querySelectorAll("letter.correct").length;
@@ -170,7 +190,7 @@ function gameOver() {
   const totalLetters = correctLetter + incorrectLetter;
   const exactitud = totalLetters > 0 ? (correctLetter / totalLetters) * 100 : 0;
 
-  const ppm = (correctWords * 10) / INITIAL_TIME;
+  const ppm = (correctWords * 60) / INITIAL_TIME;
   $ppm.textContent = ppm;
   $exactitud.textContent = `${exactitud.toFixed(2)}%`;
 }
